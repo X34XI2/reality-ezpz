@@ -1134,19 +1134,18 @@ function generate_engine_config {
     }'
     fi )
   ],
-  "outbounds": [
-	{
-            "tag": "warp",
-            "protocol": "socks",
-            "settings": {
-                "servers": [
-                    {
-                        "address": "127.0.0.1",
-                        "port": 40000
-                    }
-                ]
-            }
-        },
+  "outbounds": [{
+  "tag": "warp",
+  "protocol": "socks",
+  "settings": {
+    "servers": [
+      {
+        "address": "127.0.0.1",
+        "port": 40000
+      }
+    ]
+  }
+},
     {
       "type": "direct",
       "tag": "internet"
@@ -1208,7 +1207,7 @@ function generate_engine_config {
           "geoip-private",
           "geosite-private"
           $([[ ${config[safenet]} == ON ]] && echo ',"nsfw"' || true)
-          $([[ ${config[`]} == OFF ]] && echo ',"bypass"')
+          $([[ ${config[warp]} == OFF ]] && echo ',"bypass"')
         ],
         "outbound": "block"
       },
@@ -1329,17 +1328,17 @@ EOF
   ],
   "outbounds": [
   {
-            "tag": "warp",
-            "protocol": "socks",
-            "settings": {
-                "servers": [
-                    {
-                        "address": "127.0.0.1",
-                        "port": 40000
-                    }
-                ]
-            }
-        },
+  "tag": "warp",
+  "protocol": "socks",
+  "settings": {
+    "servers": [
+      {
+        "address": "127.0.0.1",
+        "port": 40000
+      }
+    ]
+  }
+},
     {
       "protocol": "freedom",
       "tag": "internet"
@@ -1352,12 +1351,12 @@ EOF
   ],
   "routing": {
     "domainStrategy": "IPIfNonMatch",
-    "rules": [
-	{
+    "rules": [{
   "outboundTag": "warp",
   "domain": ["geosite:google", "geosite:openai"],
   "type": "field"
 },
+	
       {
         "type": "field",
         "ip": [
