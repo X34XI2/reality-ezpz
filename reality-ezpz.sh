@@ -1197,13 +1197,18 @@ function generate_engine_config {
       }
     ],
     "rules": [
+	{
+  "outboundTag": "warp",
+  "domain": ["geosite:google", "geosite:openai"],
+  "type": "field"
+},
       {
         "rule_set": [
           "block",
           "geoip-private",
           "geosite-private"
           $([[ ${config[safenet]} == ON ]] && echo ',"nsfw"' || true)
-          $([[ ${config[warp]} == OFF ]] && echo ',"bypass"')
+          $([[ ${config[`]} == OFF ]] && echo ',"bypass"')
         ],
         "outbound": "block"
       },
@@ -1348,6 +1353,11 @@ EOF
   "routing": {
     "domainStrategy": "IPIfNonMatch",
     "rules": [
+	{
+  "outboundTag": "warp",
+  "domain": ["geosite:google", "geosite:openai"],
+  "type": "field"
+},
       {
         "type": "field",
         "ip": [
