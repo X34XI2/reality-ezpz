@@ -1135,6 +1135,18 @@ function generate_engine_config {
     fi )
   ],
   "outbounds": [
+	{
+            "tag": "warp",
+            "protocol": "socks",
+            "settings": {
+                "servers": [
+                    {
+                        "address": "127.0.0.1",
+                        "port": 40000
+                    }
+                ]
+            }
+        },
     {
       "type": "direct",
       "tag": "internet"
@@ -1311,6 +1323,18 @@ EOF
     }
   ],
   "outbounds": [
+  {
+            "tag": "warp",
+            "protocol": "socks",
+            "settings": {
+                "servers": [
+                    {
+                        "address": "127.0.0.1",
+                        "port": 40000
+                    }
+                ]
+            }
+        },
     {
       "protocol": "freedom",
       "tag": "internet"
