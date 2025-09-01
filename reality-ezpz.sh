@@ -1134,17 +1134,12 @@ function generate_engine_config {
     }'
     fi )
   ],
-  "outbounds": [{
+  "outbounds": [
+ {
   "tag": "warp",
-  "protocol": "socks",
-  "settings": {
-    "servers": [
-      {
-        "address": "127.0.0.1",
-        "port": 40000
-      }
-    ]
-  }
+  "type": "socks",
+  "server": "127.0.0.1",
+  "server_port": 40000
 },
     {
       "type": "direct",
@@ -1197,10 +1192,8 @@ function generate_engine_config {
     ],
     "rules": [
 	{
-  "outboundTag": "warp",
-  "domain": ["geosite:google", "geosite:openai"],
-  "type": "field"
-},
+  "outbound": "warp",
+}
       {
         "rule_set": [
           "block",
@@ -1543,6 +1536,7 @@ function upgrade {
   uuid=$(grep '^uuid=' "${path[config]}" 2>/dev/null | cut -d= -f2 || true)
   if [[ -n $uuid ]]; then
     sed -i '/^uuid=/d' "${path[users]}"
+    echo "RealityEZPZ=${uuid}" >> "${path[users]}"
     echo "RealityEZPZ=${uuid}" >> "${path[users]}"
     sed -i 's|=true|=ON|g; s|=false|=OFF|g' "${path[users]}"
   fi
