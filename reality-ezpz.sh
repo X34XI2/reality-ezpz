@@ -29,8 +29,8 @@ declare -A md5
 declare -A regex
 declare -A image
 
-config_path="/opt/reality-ezpz"
-compose_project='reality-ezpz'
+config_path="/opt/testvppm"
+compose_project='testvppm'
 tgbot_project='tgbot'
 BACKTITLE=RealityEZPZ
 MENU="Select an option:"
@@ -39,7 +39,7 @@ WIDTH=60
 CHOICE_HEIGHT=20
 
 image[xray]="teddysun/xray:1.8.4"
-image[sing-box]="gzxhwq/sing-box:1.13.0-alpha.18"
+image[sing-box]="gzxhwq/sing-box:latest"
 image[nginx]="nginx:1.24.0"
 image[certbot]="certbot/certbot:v2.6.0"
 image[haproxy]="haproxy:2.8.0"
@@ -1129,7 +1129,7 @@ function generate_engine_config {
       "sniff_override_destination": true,
       "domain_strategy": "prefer_ipv4",
       "method": "chacha20-ietf-poly1305",
-      "password": "'"${config[private_key]}"'",
+      "password": "'"$(openssl rand -hex 16)"'",
       "users": ['"${users_object}"']
     }'
     fi )
@@ -1525,6 +1525,7 @@ function upgrade {
     sed -i 's|security=tls-valid|security=letsencrypt|g' "${path[config]}"
   fi
   for key in "${!path[@]}"; do
+
     if [[ -d "${path[$key]}" ]]; then
       rm -rf "${path[$key]}"
     fi
@@ -1714,6 +1715,9 @@ ALPN: $([[ ${config[transport]} == 'ws' ]] && echo 'http/1.1' || echo 'h2,http/1
 Fingerprint: chrome
 $([[ ${config[security]} == 'reality' ]] && echo "PublicKey: ${config[public_key]}" || true)
 $([[ ${config[security]} == 'reality' ]] && echo "ShortId: ${config[short_id]}" || true)
+$([[ ${config[transport]} == 'ws' || ${config[transport]} == 'http' ]] && echo "Path: /${config[service_path]}" || true)
+$([[ ${config[transport]} == 'grpc' ]] && echo '&mode=gun' || true)
+$([[ ${config[transport]} == 'grpc' ]] && echo "&serviceName=${config[service_path]}" || true)
       " | tr -s '\n')
     fi
     whiptail \
@@ -1969,23 +1973,15 @@ function config_transport_menu {
       break
     fi
     if [[ ${transport} == 'ws' && ${config[security]} == 'reality' ]]; then
-      message_box 'Invalid Configuration' 'You cannot use "ws" transport with "reality" TLS certificate. Use other transports or change TLS certifcate to "letsencrypt" or "selfsigned"'
+      message_box 'Invalid Configuration' 'You cannot use "reality" TLS certificate with "ws" transport protocol. Change TLS certifcate to "letsencrypt" or "selfsigned" or use other transport protocols'
       continue
     fi
     if [[ ${transport} == 'tuic' && ${config[security]} == 'reality' ]]; then
-      message_box 'Invalid Configuration' 'You cannot use "tuic" transport with "reality" TLS certificate. Use other transports or change TLS certifcate to "letsencrypt" or "selfsigned"'
-      continue
-    fi
-    if [[ ${transport} == 'tuic' && ${config[core]} == 'xray' ]]; then
-      message_box 'Invalid Configuration' 'You cannot use "tuic" transport with "xray" core. Use other transports or change core to "sing-box"'
+      message_box 'Invalid Configuration' 'You cannot use "reality" TLS certificate with "tuic" transport. Change TLS certifcate to "letsencrypt" or "selfsigned" or use other transports'
       continue
     fi
     if [[ ${transport} == 'hysteria2' && ${config[security]} == 'reality' ]]; then
-      message_box 'Invalid Configuration' 'You cannot use "hysteria2" transport with "reality" TLS certificate. Use other transports or change TLS certifcate to "letsencrypt" or "selfsigned"'
-      continue
-    fi
-    if [[ ${transport} == 'hysteria2' && ${config[core]} == 'xray' ]]; then
-      message_box 'Invalid Configuration' 'You cannot use "hysteria2" transport with "xray" core. Use other transports or change core to "sing-box"'
+      message_box 'Invalid Configuration' 'You cannot use "reality" TLS certificate with "hysteria2" transport. Change TLS certifcate to "letsencrypt" or "selfsigned" or use other transports'
       continue
     fi
     if [[ ${transport} == 'shadowtls' && ${config[core]} == 'xray' ]]; then
@@ -2011,7 +2007,7 @@ function config_sni_domain_menu {
       message_box "Invalid Domain" '"'"${sni_domain}"'" in not a valid domain.'
       continue
     fi
-    config[domain]=$sni_domain
+    config[domain]="$sni_domain"
     update_config_file
     break
   done
@@ -2656,6 +2652,10 @@ if [[ -n ${args[add_user]} ]]; then
   username="${args[add_user]}"
 fi
 if [[ -n $username ]]; then
+  print_client_configuration "${username}"
+fi
+echo "Command has been executed successfully!"
+exit 0
   print_client_configuration "${username}"
 fi
 echo "Command has been executed successfully!"
